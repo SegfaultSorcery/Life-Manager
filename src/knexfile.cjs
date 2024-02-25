@@ -2,7 +2,7 @@ module.exports = {
     development: {
         client: 'sqlite3',
         connection: {
-            filename: '../db/life-manager-databse.db',
+            filename: '../db/life-manager-database.db',
         },
         migrations: {
             directory: '../db/migrations', 

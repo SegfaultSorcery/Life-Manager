@@ -1,5 +1,4 @@
 <template>
-    <h2>RPI-SERVER</h2>
 </template>
 
 <script>
