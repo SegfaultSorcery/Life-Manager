@@ -1,43 +1,66 @@
 import express from 'express' 
+import session from 'express-session' 
 import path from 'path';
-import knex from './src/knex.cjs'
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+// import db from './src/knex.cjs'
+import knex from 'knex'
 import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken'; 
 import cors from 'cors';
+import morgan from 'morgan';
+const knex_config ={
+    client: 'sqlite3',
+    connection: {
+        filename: './db/life-manager-database.db',
+    },
+    migrations: {
+        directory: './db/migrations', 
+        tableName: 'knex_migrations',
+    },
+    seeds: {
+        directory: './db/seeds',
+    },
+    useNullAsDefault: true,
+}
+const db = knex(knex_config);
+const port = process.env.PORT || 3000;
+const app = express()
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const app = express();
-const port = 3000;
+app.use(morgan('combined'));
+app.use(bodyParser.json());
 app.use(cors());
-// app.use(bodyParser);
+app.use(express.static(path.join(__dirname, 'dist')));
+app.use(session({
+    secret: 'secret-key',
+    resave: false,
+    saveUninitialized: true,
+}));
 
-// Serve static files from the Vue.js build
-const distDir = path.join(new URL(import.meta.url).pathname, 'dist');
-app.use(express.static(distDir));
-
-// Handle all routes and serve the main index.html file
+app.post('/login',async (req, res) =>{
+    try{
+        const user = await db('users')
+            .select('*')
+            .where('user_name', req.body.username)
+            .where('password', req.body.password)
+            .first();
+        if(user){
+            req.session.user = user.user_name;
+            res.json({ success: true});
+        }else{
+            res.status(401).json({ success: false});
+        }
+    }
+    catch(err){
+            res.status(500).json({message: "Server Error"});
+    }
+})
+// Handle all routes by serving the 'index.html' file
 app.get('*', (req, res) => {
-  res.sendFile(path.join(distDir, 'index.html'));
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(distDir, 'index.html'));
-});
-
-// app.post('/login', async (req, res) => {
-//     const {username, password} = req.body;
-//     const raw = "SELECT * FROM users WHERE username = ? AND password = ? LIMIT 1"
-//     try{
-//         const user = await knex.raw(raw, [username, password]);
-//             if (user) {
-//                 } else {
-//                 }
-//     }
-//     catch (error) {
-//         console.error('Error during authentication:', error);
-//     };
-// })
-
-// Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
