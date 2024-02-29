@@ -1,12 +1,12 @@
 <template>
 
-    <div class="myContainer flex items-center justify-center min-h-screen font-bold">
+    <div class="flex items-center justify-center min-h-screen font-bold">
         <div class= "border-container">
             <div class="flex justify-center py-10">
                 <h1 class="text-5xl">Login</h1>
             </div>
             <div class="flex flex-col py-3 space-y-10"> <input class="input" id="username" placeholder="username" v-model="username" required/>
-                <input class="inputs" id="password" placeholder="password" type="password" v-model="password" required/>
+                <input class="input" id="password" placeholder="password" type="password" v-model="password" required/>
             </div>
             <span class="flex justify-center py-10 space-x-10">
                 <button type="submit" class="button" @click="login">Login</button>

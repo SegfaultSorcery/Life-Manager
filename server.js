@@ -1,5 +1,6 @@
 import express from 'express' 
 import session from 'express-session' 
+import rateLimit from 'express-rate-limit'
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -38,8 +39,14 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
 }));
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 3, // limit each IP to 3 requests per windowMs
+    message: 'Too many login attempts, please try again later',
+});
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post('/login',async (req, res) =>{
+app.post('/login', async (req, res) =>{
     try{
         const user = await db('users')
             .select('*')
@@ -50,7 +57,7 @@ app.post('/login',async (req, res) =>{
             req.session.user = user.user_name;
             res.json({ success: true});
         }else{
-            res.status(401).json({ success: false});
+            res.status(401).json({success: false});
         }
     }
     catch(err){
