@@ -46,15 +46,24 @@ const loginLimiter = rateLimit({
 });
 app.use(bodyParser.urlencoded({ extended: true }));
 
+function isAuthenticated(req, res, next) {
+    if (req.session && req.session.userId) {
+        next();
+    } else {
+        res.redirect('/login');
+    }
+}
+
 app.post('/login', async (req, res) =>{
     try{
         const user = await db('users')
             .select('*')
-            .where('user_name', req.body.username)
+            .where('username', req.body.username)
             .where('password', req.body.password)
             .first();
         if(user){
-            req.session.user = user.user_name;
+            req.session.user_id = user.id;
+            req.session.user = user.username;
             res.json({ success: true});
         }else{
             res.status(401).json({success: false});
@@ -63,7 +72,24 @@ app.post('/login', async (req, res) =>{
     catch(err){
             res.status(500).json({message: "Server Error"});
     }
-})
+});
+
+app.post('/wishlist', async (req,res) => {
+    try{
+        const wishlist = await db('items')
+            .select('*')
+            // .where('user_id', req.session.user_id)
+        if(wishlist){
+            res.json(wishlist);
+        }else{
+            res.status(401).json({success: false});
+        }
+    }
+    catch(err){
+            res.status(500).json({message: "Server Error"});
+    }
+});
+
 // Handle all routes by serving the 'index.html' file
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));

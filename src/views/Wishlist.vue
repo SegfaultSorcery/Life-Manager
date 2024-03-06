@@ -19,21 +19,12 @@
             <input class="bg-transparent border w-3/4" v-model="new_item.name" @keyup.enter="addItem" placeholder="name"></input>
             <input class="bg-transparent border w-1/4" v-model="new_item.price" @keyup.enter="addItem" placeholder="price"></input>
         </span>
-
-                    <!-- <td class="flex justify-center p-0.5 items-center w-1/2" v-for = "(item, index) in item_list" :key="index" > -->
-                    <!--     <input class="border bg-transparent w-full" :placeholder="item" @change="changeListItem"></input> -->
-                    <!--     <button class="bg-red-400 w-6"@click="removeItem(index)">-</button> -->
-                    <!-- </td> -->
-    <!---->
-    <!--     <div class="flex justfiy-center p-0.5 items-center w-1/2 mt-4"> -->
-    <!--         <input class="border bg-transparent w-full" v-model="new_item" @keyup.enter="addItem" :placeholder="item"></input> -->
-    <!--         <button class="bg-green-400 w-6" @click="addItem" >+</button> -->
-    <!--     </div> -->
     </div> 
 
 </template>
 
 <script>
+    import WishlistService from '@/services/WishlistService';
     class Item {
         constructor(name, price) {
             this.name = name;
@@ -44,13 +35,23 @@
         data(){
             return{
                 test: new Item("test", 20),
-                
                 item_list: [],
                 new_item: new Item('',''),
             }
         },
-        created(){
-            this.item_list.push(this.test);
+        async created(){
+            try{
+                const res = await WishlistService.request();
+                console.log(res);
+                const wishlistData = res.data;
+                console.log(wishlistData);
+                wishlistData.forEach(item => {
+                    console.log("test");
+                    console.log(item);
+                    this.item_list.push(new Item(item.name, item.price));
+                })
+            }
+            catch(err){console.error(err)}
         },
         methods: {
             addItem(){

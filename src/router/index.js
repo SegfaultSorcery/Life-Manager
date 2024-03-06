@@ -24,7 +24,7 @@ const router = createRouter({
             component: Wishlist,
         },
         {
-            path: '/',
+            path: '/login',
             name: 'login',
             component: Login 
         },

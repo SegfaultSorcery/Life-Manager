@@ -37,7 +37,6 @@ import AuthentificationService from '@/services/AuthentificationService';
                     }
                 }
                 catch(err){
-
                 }
             },
         },
