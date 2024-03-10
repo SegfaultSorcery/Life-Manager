@@ -2,7 +2,10 @@ import Api from '@/services/Api'
 
 export default{
     request(){
-        return Api().post('wishlist');
+        return Api().get('/api/wishlist');
+    },
+    update(entry){
+        return Api().patch('/api/wishlist', entry);
     }
 }
 

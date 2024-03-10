@@ -20,7 +20,7 @@ const knex_config ={
         tableName: 'knex_migrations',
     },
     seeds: {
-        directory: './db/seeds',
+        directory: './db/seeds'
     },
     useNullAsDefault: true,
 }
@@ -31,7 +31,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 app.use(morgan('combined'));
-app.use(bodyParser.json());
+app.use(bodyParser.json())
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'dist')));
 app.use(session({
@@ -47,10 +47,10 @@ const loginLimiter = rateLimit({
 app.use(bodyParser.urlencoded({ extended: true }));
 
 function isAuthenticated(req, res, next) {
-    if (req.session && req.session.userId) {
+    if (req.session && req.session.user_id) {
         next();
     } else {
-        res.redirect('/login');
+        res.status(401);
     }
 }
 
@@ -74,13 +74,15 @@ app.post('/login', async (req, res) =>{
     }
 });
 
-app.post('/wishlist', async (req,res) => {
+app.get('/api/wishlist',isAuthenticated, async (req,res) => {
     try{
-        const wishlist = await db('items')
+        const items = await db('items')
             .select('*')
-            // .where('user_id', req.session.user_id)
-        if(wishlist){
-            res.json(wishlist);
+            .from('wishlist')
+            .join('items', 'wishlist.item_id', 'items.id')
+            .where('user_id', req.session.user_id)
+        if(items){
+            res.json(items);
         }else{
             res.status(401).json({success: false});
         }
@@ -89,6 +91,16 @@ app.post('/wishlist', async (req,res) => {
             res.status(500).json({message: "Server Error"});
     }
 });
+app.patch('wishlist', async (req,res) => {
+    try{
+        const wishlist = await db('wishlist')
+        const item = await db('items')
+        .select()
+    }
+    catch(err){
+        console.error(err);
+    }
+})
 
 // Handle all routes by serving the 'index.html' file
 app.get('*', (req, res) => {

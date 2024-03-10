@@ -26,7 +26,8 @@
 <script>
     import WishlistService from '@/services/WishlistService';
     class Item {
-        constructor(name, price) {
+        constructor(name, price, id) {
+            this.id = id;
             this.name = name;
             this.price = price;
         }
@@ -36,22 +37,23 @@
             return{
                 test: new Item("test", 20),
                 item_list: [],
-                new_item: new Item('',''),
+                new_item: new Item('','',''),
             }
         },
         async created(){
             try{
                 const res = await WishlistService.request();
-                console.log(res);
                 const wishlistData = res.data;
                 console.log(wishlistData);
                 wishlistData.forEach(item => {
                     console.log("test");
                     console.log(item);
-                    this.item_list.push(new Item(item.name, item.price));
+                    this.item_list.push(new Item(item.name, item.price, item.id));
                 })
             }
-            catch(err){console.error(err)}
+            catch(err){
+                this.$router.push('/login')
+            }
         },
         methods: {
             addItem(){
@@ -64,9 +66,13 @@
             removeItem(index){
                 this.item_list.splice(index, 1 );
             },
-            changeListItem(){
-                       
-            }
+            // changeListItem(index){
+            //     const res = await WishlistService.update(item_list[index]);                      
+            //     if(res.success){
+            //         //apply change
+            //         // item_list [index] = 
+            //     }
+            // }
         }
     }
 

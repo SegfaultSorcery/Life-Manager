@@ -32,11 +32,12 @@ import AuthentificationService from '@/services/AuthentificationService';
                         username: this.username,
                         password: this.password,
                     });
-                    if(res.data.success){
-                        this.$router.push('/about');
+                    if(res.data.success === true){
+                        this.$router.push('/wishlist');
                     }
                 }
                 catch(err){
+                    console.error(err);
                 }
             },
         },
