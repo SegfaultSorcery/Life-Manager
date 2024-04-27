@@ -1,4 +1,4 @@
-<template>
+<template>wishlist
     <div class="flex flex-col items-center justify-center min-h-screen">
         <table class="w-1/2">
             <thead>
@@ -24,7 +24,9 @@
 </template>
 
 <script>
+    import {ref, computed} from 'vue';
     import WishlistService from '@/services/WishlistService';
+
     class Item {
         constructor(name, price, id) {
             this.id = id;
@@ -33,55 +35,51 @@
         }
     }
     export default{
-        data(){
-            return{
-                test: new Item("test", 20),
-                item_list: [],
-                new_item: new Item('','',''),
+        setup(){
+            let item_list = ref([]);
+            let new_item = ref(new Item());
+
+            function addItem(){
+                if(new_item.value.name.trim() !== ''){
+                    item_list.value.push(new_item.value);
+                    new_item.value = new Item();
+                } 
             }
-        },
-        async created(){
-            try{
-                const res = await WishlistService.request();
-                const wishlistData = res.data;
-                console.log(wishlistData);
-                wishlistData.forEach(item => {
-                    console.log("test");
-                    console.log(item);
-                    this.item_list.push(new Item(item.name, item.price, item.id));
-                })
-            }
-            catch(err){
-                this.$router.push('/login')
-            }
-        },
-        methods: {
-            addItem(){
-                if(this.new_item.name.trim() !== ''){
-                    this.item_list.push(this.new_item);
-                    this.new_item = new Item('','');
+            async function removeItem(index){
+                try{
+                    const res = await WishlistService.update(item_list.value[index].id);  
+                    if(res){
+                        item_list.value.splice(index,1);
+                    }
                 }
-                console.log(this.item_list[0].name);
-            },
-            removeItem(index){
-                this.item_list.splice(index, 1 );
-            },
-            // changeListItem(index){
-            //     const res = await WishlistService.update(item_list[index]);                      
-            //     if(res.success){
-            //         //apply change
-            //         // item_list [index] = 
-            //     }
-            // }
+                catch(err){
+                    console.error("Error updating item:", err);
+                }
+            }
+            async function fetchWishlist(){
+                try{
+                    const res = await WishlistService.request();
+                    const wishlistData = res.data;
+                    console.log(wishlistData);
+                    wishlistData.forEach(item => {
+                        console.log(item);
+                        item_list.value.push(new Item(item.name, item.price, item.id));
+                    })
+                }
+                catch(err){
+                    console.error("Error fetching wishlist:", err);
+                    // this.$router.push('login')
+                }
+            }
+            
+            fetchWishlist();
+            return{
+                item_list,
+                new_item,
+                addItem,
+                removeItem,
+                fetchWishlist
+            }
         }
     }
-
-
 </script>
-
-<style scoped>
-    .wishlist{@apply flex justify-center;}
-
-    .list_item{@apply flex bg-transparent border border-2;}
-    .add-button{@apply bg-red-400 w-6;}
-</style>

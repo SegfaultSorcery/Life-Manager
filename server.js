@@ -91,11 +91,10 @@ app.get('/api/wishlist',isAuthenticated, async (req,res) => {
             res.status(500).json({message: "Server Error"});
     }
 });
-app.patch('wishlist', async (req,res) => {
+app.patch('/api/wishlist', isAuthenticated, async (req,res) => {
     try{
-        const wishlist = await db('wishlist')
-        const item = await db('items')
-        .select()
+        db('items').insert(req.new_item)
+        db('wishlist').insert(req.new_item.id)
     }
     catch(err){
         console.error(err);
