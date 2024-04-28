@@ -92,13 +92,35 @@ app.get('/api/wishlist',isAuthenticated, async (req,res) => {
     }
 });
 app.patch('/api/wishlist', isAuthenticated, async (req,res) => {
-    try{
-        db('items').insert(req.new_item)
-        db('wishlist').insert(req.new_item.id)
+    const action = req.body.action;
+    if(action === 'add'){
+        try{
+            db('items').insert(req.new_item);
+            db('wishlist').insert(req.new_item.id);
+            res.status(200).send();
+        }
+        catch(err){
+            console.error(err);
+            res.status(500).json({message: "Server Error"});
+        }
+    }else if(action === 'remove'){
+        const item_id = req.body.item_id;
+        try{
+            db('wishlist')
+            .where('id', item_id)
+            .del()
+            .then(numDeletedRows =>
+                res.status(200).json({status: "success"})
+            );
+        }
+        catch(err){
+            console.error(err);
+        }
+
+    }else{
+        res.status(500).json({status: "error"});
     }
-    catch(err){
-        console.error(err);
-    }
+
 })
 
 // Handle all routes by serving the 'index.html' file

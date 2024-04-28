@@ -46,9 +46,16 @@
                 } 
             }
             async function removeItem(index){
+                console.log("removing Item: ", item_list.value[index].name);
+                const item_id  = item_list.value[index].id;
+                console.log("with id: ", item_id);
+                const req = {
+                    'action': 'remove',
+                    'item_id': item_id,
+                };
                 try{
-                    const res = await WishlistService.update(item_list.value[index].id);  
-                    if(res){
+                    const res = await WishlistService.update(req);  
+                    if(res.ok){
                         item_list.value.splice(index,1);
                     }
                 }
