@@ -7,7 +7,7 @@
                     <th>Price</th>
                 </tr>
             </thead>
-            <tbody class="" v-for="(item,index) in item_list">
+            <tbody class="" v-for="(item,index) in item_list" :key="item.id">
                 <tr>
                     <td class="border w-3/4">{{item.name}}</td>
                     <td class="border w-1/4">{{item.price}}</td>
@@ -24,7 +24,7 @@
 </template>
 
 <script>
-    import {ref, computed} from 'vue';
+    import {ref, reactive, computed} from 'vue';
     import WishlistService from '@/services/WishlistService';
 
     class Item {
@@ -40,9 +40,26 @@
             let new_item = ref(new Item());
 
             function addItem(){
+
+                const req = {
+                    'action': 'add',
+                    'item': new_item.value,
+                };
+                
                 if(new_item.value.name.trim() !== ''){
-                    item_list.value.push(new_item.value);
-                    new_item.value = new Item();
+                    try{
+                        WishlistService.update(req)
+                        .then(res =>{
+                            if(res.status === 200){
+                                item_list.value.push(new_item.value);
+                                new_item.value = new Item();
+                            }
+                        })
+                    }
+                    catch(err){
+                        console.error("Faild to add item to database: ", err);
+
+                    }
                 } 
             }
             async function removeItem(index){
@@ -54,10 +71,12 @@
                     'item_id': item_id,
                 };
                 try{
-                    const res = await WishlistService.update(req);  
-                    if(res.ok){
-                        item_list.value.splice(index,1);
-                    }
+                    await WishlistService.update(req)  
+                    .then(res =>{
+                        if(res.status === 200){
+                            item_list.value.splice(index,1);
+                        }
+                    })
                 }
                 catch(err){
                     console.error("Error updating item:", err);

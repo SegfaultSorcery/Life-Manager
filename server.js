@@ -94,10 +94,19 @@ app.get('/api/wishlist',isAuthenticated, async (req,res) => {
 app.patch('/api/wishlist', isAuthenticated, async (req,res) => {
     const action = req.body.action;
     if(action === 'add'){
+        const item_name = req.body.item.name;
+        const item_price = req.body.item.price;
+        const user_id = req.session.user_id;
         try{
-            db('items').insert(req.new_item);
-            db('wishlist').insert(req.new_item.id);
-            res.status(200).send();
+            db('items')
+                .insert({name: item_name, price: item_price, user_id: user_id})
+                .then(ids => {
+                    const item_id = ids[0]; 
+                    return db('wishlist').insert({ item_id: item_id });
+                })
+                .then(() => {
+                    res.status(200).json('Item added to wishlist');
+                })
         }
         catch(err){
             console.error(err);
@@ -107,7 +116,7 @@ app.patch('/api/wishlist', isAuthenticated, async (req,res) => {
         const item_id = req.body.item_id;
         try{
             db('wishlist')
-            .where('id', item_id)
+            .where('item_id', item_id)
             .del()
             .then(numDeletedRows =>
                 res.status(200).json({status: "success"})
