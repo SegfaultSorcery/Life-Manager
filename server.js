@@ -4,27 +4,11 @@ import rateLimit from 'express-rate-limit'
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-// import db from './src/knex.cjs'
-import knex from 'knex'
 import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken'; 
 import cors from 'cors';
 import morgan from 'morgan';
-const knex_config ={
-    client: 'sqlite3',
-    connection: {
-        filename: './db/life-manager-database.db',
-    },
-    migrations: {
-        directory: './db/migrations', 
-        tableName: 'knex_migrations',
-    },
-    seeds: {
-        directory: './db/seeds'
-    },
-    useNullAsDefault: true,
-}
-const db = knex(knex_config);
+import DB from './src/db/db.cjs'
 const port = process.env.PORT || 3000;
 const app = express()
 const __filename = fileURLToPath(import.meta.url);
@@ -41,7 +25,7 @@ app.use(session({
 }));
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 3, // limit each IP to 3 requests per windowMs
+    max: 3, // limit each IP to 3 requests per 'windowMs'
     message: 'Too many login attempts, please try again later',
 });
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -56,14 +40,12 @@ function isAuthenticated(req, res, next) {
 
 app.post('/login', async (req, res) =>{
     try{
-        const user = await db('users')
-            .select('*')
-            .where('username', req.body.username)
-            .where('password', req.body.password)
-            .first();
+        const username = req.body.username;
+        const password = req.body.password;
+        const user = await DB.checkCredentials(username, password);
         if(user){
             req.session.user_id = user.id;
-            req.session.user = user.username;
+            req.session.user = user.password;
             res.json({ success: true});
         }else{
             res.status(401).json({success: false});
@@ -71,16 +53,13 @@ app.post('/login', async (req, res) =>{
     }
     catch(err){
             res.status(500).json({message: "Server Error"});
+            console.error(err);
     }
 });
 
 app.get('/api/wishlist',isAuthenticated, async (req,res) => {
     try{
-        const items = await db('items')
-            .select('*')
-            .from('wishlist')
-            .join('items', 'wishlist.item_id', 'items.id')
-            .where('user_id', req.session.user_id)
+        const items = await DB.fetchWishlist(req.session.user_id);
         if(items){
             res.json(items);
         }else{
@@ -88,7 +67,8 @@ app.get('/api/wishlist',isAuthenticated, async (req,res) => {
         }
     }
     catch(err){
-            res.status(500).json({message: "Server Error"});
+        res.status(500).json({message: "Server Error"});
+        console.error(err);
     }
 });
 app.patch('/api/wishlist', isAuthenticated, async (req,res) => {
@@ -97,39 +77,23 @@ app.patch('/api/wishlist', isAuthenticated, async (req,res) => {
         const item_name = req.body.item.name;
         const item_price = req.body.item.price;
         const user_id = req.session.user_id;
-        try{
-            db('items')
-                .insert({name: item_name, price: item_price, user_id: user_id})
-                .then(ids => {
-                    const item_id = ids[0]; 
-                    return db('wishlist').insert({ item_id: item_id });
-                })
-                .then(() => {
-                    res.status(200).json('Item added to wishlist');
-                })
-        }
-        catch(err){
-            console.error(err);
+        const success = await jDB.addItemToWish(user_id, item_name, item_price);
+        if(success){
+            res.status(200).json({status: 'success', item_id: item_id});
+        }else{
             res.status(500).json({message: "Server Error"});
         }
+
     }else if(action === 'remove'){
         const item_id = req.body.item_id;
-        try{
-            db('wishlist')
-            .where('item_id', item_id)
-            .del()
-            .then(numDeletedRows =>
-                res.status(200).json({status: "success"})
-            );
-        }
-        catch(err){
-            console.error(err);
+        const success = await DB.removeItemFromWishlist(item_id);
+        if(success){
+            res.status(200).json({status: 'success', item_id: item_id});
+        }else{
+            res.status(500).json({message: "Server Error"});
         }
 
-    }else{
-        res.status(500).json({status: "error"});
     }
-
 })
 
 // Handle all routes by serving the 'index.html' file
@@ -139,4 +103,3 @@ app.get('*', (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
-

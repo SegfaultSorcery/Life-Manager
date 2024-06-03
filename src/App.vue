@@ -1,19 +1,12 @@
 <template>
-    <div id="app">
-        <router-view></router-view>
-    </div>
+    <v-app>
+        <!-- <Navbar /> -->
+        <v-main>
+            <router-view></router-view>
+        </v-main>
+    </v-app>
 </template>
 
-<script>
-    import Header from './components/general_purpose/Header.vue';
-    import Login from './views/Login.vue';
-
-
-    export default{
-        components: {
-            Header,
-            Login, 
-        },
-    }
+<script setup>
+    import Navbar from './views/Navbar.vue'
 </script>
-
