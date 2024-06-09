@@ -9,7 +9,9 @@
             <v-expansion-panel v-for="(category, index) in categories" :key="index">
                 <v-expansion-panel-title>
                     <div class="flex justify-between items-center w-full">
-                        <div class="font-bold"> {{category.name}}</div>
+                        <span class="font-bold"> 
+                            <span>{{ category.name }} ({{ category.items.reduce((sum, item) => sum + parseFloat(item.price), 0).toFixed(2) }})</span>
+                        </span>
                         <div>
                             <v-btn 
                                 icon="mdi-plus" 
@@ -160,17 +162,17 @@
                 {
                     name: 'Books',
                     items: [
-                        { name: 'Book 1', price: '$10' },
-                        { name: 'Book 2', price: '$15' },
-                        { name: 'Book 3', price: '$20' }
+                        { name: 'Book 1', price: '10' },
+                        { name: 'Book 2', price: '15' },
+                        { name: 'Book 3', price: '20' }
                     ]
                 },
                 {
                     name: 'Electronics',
                     items: [
-                        { name: 'Electronics Gadget 1', price: '$100' },
-                        { name: 'Electronics Gadget 2', price: '$150' },
-                        { name: 'Electronics Gadget 3', price: '$200' }
+                        { name: 'Electronics Gadget 1', price: '100' },
+                        { name: 'Electronics Gadget 2', price: '150' },
+                        { name: 'Electronics Gadget 3', price: '200' }
                     ]
                 }
             ];
