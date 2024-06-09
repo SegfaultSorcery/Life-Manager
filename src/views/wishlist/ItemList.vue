@@ -1,80 +1,75 @@
 <template>
-    <v-expansion-panels multiple>
-        <v-expansion-panel v-for="(category, index) in categories" :key="index">
-            <v-expansion-panel-title>
-                <div>{{category.name}}</div>
-                <v-btn 
-                    icon="mdi-plus" 
-                    density="compact" 
-                    @click.stop="addItem" 
-                    >
-                    <v-icon color="accent"></v-icon>
-
-                </v-btn>
-            </v-expansion-panel-title>
-            <v-expansion-panel-text>
-                <v-table>
-                    <tr v-for="(items, index) in category.items">
-                        <td> {{items.name}} </td>
-                        <td> {{items.price}} </td>
-                        <td> 
+    <v-list>
+        <v-toolbar color="accent">
+            <v-toolbar-title>
+                Wishlist 
+            </v-toolbar-title>
+        </v-toolbar>
+        <v-expansion-panels flat multiple>
+            <v-expansion-panel v-for="(category, index) in categories" :key="index">
+                <v-expansion-panel-title>
+                    <div class="flex justify-between items-center w-full">
+                        <div class="font-bold"> {{category.name}}</div>
+                        <div>
                             <v-btn 
-                                icon="mdi-delete" 
+                                icon="mdi-plus" 
                                 density="compact" 
-                                @click="removeItem(subIndex)"
+                                @click.stop="addItem" 
                                 >
-                                <v-icon color="red"></v-icon>
+                                <v-icon color="accent"></v-icon>
                             </v-btn>
-                        </td>
-                    </tr>
-                </v-table>
-            </v-expansion-panel-text>
-        </v-expansion-panel>
-    </v-expansion-panels>
+                        </div>
+                    </div>
+                </v-expansion-panel-title>
+                <v-expansion-panel-text>
+                    <v-simple-table class="d-flex flex-column">
+                        <template #default>
+                            <thead>
+                                <tr class="flex w-full py-4">
+                                    <th class="w-1/3">Item</th>
+                                    <th class="w-1/3">Price</th>
+                                    <th class="w-1/3 ">Options</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="flex items-center w-full py-2" v-for="(items, index) in category.items">
+                                    <td class="w-1/3"> 
+                                        <div class="flex w-full justify-center">
+                                            {{items.name}}
+                                        </div>
+                                    </td>
+                                    <td class="w-1/3"> 
+                                        <div class="flex justify-center">
+                                            {{items.price}} 
+                                        </div>
+                                    </td>
+                                    <td class="w-1/3">
+                                        <div class="flex justify-center items-center">
+                                            <v-btn 
+                                                icon="mdi-delete" 
+                                                density="compact" 
+                                                @click="removeItem(subIndex)"
+                                                >
+                                                <v-icon color="red"></v-icon>
+                                            </v-btn>
+                                            <v-btn
+                                                icon="mdi-pencil"
+                                                density="compact" 
+                                                @click=""
+                                                >
+                                                <v-icon color="blue"></v-icon>
+                                            </v-btn>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </template>
+                    </v-simple-table>
+                </v-expansion-panel-text>
+            </v-expansion-panel>
+        </v-expansion-panels>
+    </v-list>
 </template>
-<!-- <template> -->
-<!--     <v-data-table -->
-<!--         :groupBy="groupBy" -->
-<!--         :headers="headers" -->
-<!--         :items="categories" -->
-<!--         class="w-3" -->
-<!--         item-value="items" -->
-<!--     > -->
-<!--         <template v-slot:group-header="{item, columns, toggleGroup, isGroupOpen }"> -->
-<!--             <tr> -->
-<!--                 <td :colspan="columns.length"> -->
-<!--                     <div class="flex items-center"> -->
-<!--                         <VBtn -->
-<!--                         :icon="isGroupOpen(item) ? '$expand' : '$next'" -->
-<!--                         size="small" -->
-<!--                         variant="text" -->
-<!--                         @click="toggleGroup(item)" -->
-<!--                         > -->
-<!--                         </VBtn> -->
-<!---->
-<!--                         <div class="flex-grow">{{item.value}}</div> -->
-<!--                         <div> -->
-<!--                             <v-btn icon="mdi-plus" density="compact" @click="addItem" ><v-icon color="accent"></v-icon></v-btn> -->
-<!---->
-<!--                         </div> -->
-<!--                     </div> -->
-<!---->
-<!--                 </td> -->
-<!--             </tr> -->
-<!--         </template> -->
-<!---->
-<!--         <template v-slot:item="{item, index}"> -->
-<!--             <tr v-for="(subItem, subIndex) in item.items" :key="subIndex"> -->
-<!--                 <td class="flex-1"> {{subItem.name}} </td> -->
-<!--                 <td class="flex-1"> {{subItem.price}} </td> -->
-<!--                 <td class="flex-1">  -->
-<!--                     <v-btn icon="mdi-delete" density="compact" @click="removeItem(subIndex)"><v-icon color="red"></v-icon></v-btn> -->
-<!---->
-<!--                 </td> -->
-<!--             </tr> -->
-<!--         </template> -->
-<!--     </v-data-table> -->
-<!-- </template> -->
 
 <script setup>
     import {ref, reactive, computed} from 'vue';
@@ -173,9 +168,9 @@
                 {
                     name: 'Electronics',
                     items: [
-                        { name: 'Gadget 1', price: '$100' },
-                        { name: 'Gadget 2', price: '$150' },
-                        { name: 'Gadget 3', price: '$200' }
+                        { name: 'Electronics Gadget 1', price: '$100' },
+                        { name: 'Electronics Gadget 2', price: '$150' },
+                        { name: 'Electronics Gadget 3', price: '$200' }
                     ]
                 }
             ];
